@@ -25,25 +25,6 @@
 
 <body>
 	<div id='app'>
-		<!-- <div class='create'>
-			<h3>保存数据，显示数据</h3>
-			<input type="text" id="user" placeholder="用户名" value="" /><br />
-			<input type="text" id="age" placeholder="年龄" /><br />
-			<input type="radio" name="sex" value="男" checked />男
-			<input type="radio" name="sex" value="女" />女<br />
-			<input type="button" id="btn" value="添加数据" />
-			<hr />
-		</div>
-		<table border="1">
-			<thead>
-				<th>序号</th>
-				<th>姓名</th>
-				<th>年龄</th>
-				<th>性别</th>
-				<th>操作</th>
-			</thead>
-			<tbody></tbody>
-		</table> -->
 	</div>
 </body>
 <script src="../js/vue.js"></script>
@@ -64,15 +45,11 @@
 	let store = new Vuex.Store({
 		strict: true,
 		state: {
-			userName: getUserData('name'),
-			userAge: getUserData('age'),
-			userSex: getUserData('sex')
+			arr1: getUserData('oArry'),
 		},
 		mutations: {
-			setData(state, [userName, userAge, userSex]) {
-				state.userName = userName;
-				state.userAge = userAge;
-				state.userSex = userSex;
+			setData(state, arr) {
+				state.arr1 = arr;
 			}
 		},
 		actions: {
@@ -99,51 +76,24 @@
 				userName: '',
 				userAge: '',
 				userSex: '',
+				arr: []
 			}
 		},
 		methods: {
 			saveData() {
-				this.$store.dispatch('setData', [this.userName, this.userAge, this.userSex]);
-				this.saveLocalData();
+				this.arr.push({
+					userName: this.userName,
+					userAge: this.userAge,
+					userSex: this.userSex
+				})
+				this.$store.dispatch('setData', this.arr);
+				localStorage.setItem('oArry', JSON.stringify(this.arr));
 			},
-			saveLocalData() {
-				let info = { "name": this.userName, "age": this.userAge, "sex": this.userSex }
-				
-				// localStorage.setItem('name', this.userName);
-				// localStorage.setItem('age', this.userAge);
-				// localStorage.setItem('sex', this.userSex);
-			}
+			
 		},
 
 	}
-	let oTr = {
-		template: `
-		<tr>
-			<th></th>
-			<th>{{userName}}</th>
-			<th></th>
-			<th></th>
-			<th>操作</th>
-		</tr>
-		`,
-		computed: {
-			userName() {
-				return this.$store.state.userName
-			},
-			userAge() {
-				return this.$store.state.userAge
-			},
-			userSex() {
-				return this.$store.state.userSex
-			}
-		},
-		data() {
-			return {
-				arr1: []
-			}
-		},
 
-	}
 	let oTable = {
 		template: `
 		<table border="1">
@@ -155,19 +105,24 @@
 				<th>性别</th>
 				<th>操作</th>
 			</tr>
-			<tr is='oTr'>
-			
+			<tr v-for='(d,i) in arry'>
+				<th>{{i+1}}</th>
+				<th>{{d.userName}}</th>
+				<th>{{d.userAge}}</th>
+				<th>{{d.userSex}}</th>
+				<th>删除</th>
 			</tr>
 			</thead>
 			<tbody></tbody>
 		</table>
 		`,
-		components: { oTr },
-		data() {
-			return {
 
+		computed: {
+			arry() {
+				return this.$store.state.arr1
 			}
 		},
+
 	}
 	let App = {
 		template: `
