@@ -1,52 +1,190 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-		<title></title>
-		<style type="text/css">
-			th{
-				width: 250px;
-			}
-			hr{
-				margin:30px 0;
-			}
-			td{
-				text-align: center;
-			}
-			tr{
-				line-height: 50px;
-			}
-		</style>
-	</head>
-	<body>
-		<div id='app'>
-			<div class='create'>
-				<h3>保存数据，显示数据</h3>
-				<input type="text" id="user" placeholder="用户名" value="" /><br />
-				<input type="text" id="age" placeholder="年龄" /><br />
-				<input type="radio" name="sex" value="男" checked />男
-				<input type="radio" name="sex" value="女" />女<br />
-				<input type="button" id="btn" value="添加数据" />
-				<hr />
-			</div>				
-			<table border="1">
-				<thead>
-					<th>序号</th>
-					<th>姓名</th>
-					<th>年龄</th>
-					<th>性别</th>
-					<th>操作</th>
-				</thead>
-				<tbody></tbody>
-			</table>
+
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<style type="text/css">
+		th {
+			width: 250px;
+		}
+
+		hr {
+			margin: 30px 0;
+		}
+
+		td {
+			text-align: center;
+		}
+
+		tr {
+			line-height: 50px;
+		}
+	</style>
+</head>
+
+<body>
+	<div id='app'>
+		<!-- <div class='create'>
+			<h3>保存数据，显示数据</h3>
+			<input type="text" id="user" placeholder="用户名" value="" /><br />
+			<input type="text" id="age" placeholder="年龄" /><br />
+			<input type="radio" name="sex" value="男" checked />男
+			<input type="radio" name="sex" value="女" />女<br />
+			<input type="button" id="btn" value="添加数据" />
+			<hr />
 		</div>
-	</body>
-	<script type="text/javascript">
-		
-		//把.create和table做出两个组件.(还可以把一个tr做成组件).
-		//每次点击'添加数据',都在table内插入一条数据.
-		//点击删除,删除当条数据.
-		//刷新后保留当前的数据条数.
+		<table border="1">
+			<thead>
+				<th>序号</th>
+				<th>姓名</th>
+				<th>年龄</th>
+				<th>性别</th>
+				<th>操作</th>
+			</thead>
+			<tbody></tbody>
+		</table> -->
+	</div>
+</body>
+<script src="../js/vue.js"></script>
+<script src="../js/vuex.js"></script>
+<script type="text/javascript">
+
+	//把.create和table做出两个组件.(还可以把一个tr做成组件).
+	//每次点击'添加数据',都在table内插入一条数据.
+	//点击删除,删除当条数据.
+	//刷新后保留当前的数据条数.
+
+	function getUserData(name) {
+		let data = localStorage.getItem(name)
+		if (data) {
+			return data
+		}
+	}
+	let store = new Vuex.Store({
+		strict: true,
+		state: {
+			userName: getUserData('name'),
+			userAge: getUserData('age'),
+			userSex: getUserData('sex')
+		},
+		mutations: {
+			setData(state, [userName, userAge, userSex]) {
+				state.userName = userName;
+				state.userAge = userAge;
+				state.userSex = userSex;
+			}
+		},
+		actions: {
+			setData(store, val) {
+				store.commit('setData', val)
+			}
+
+		}
+	})
+	let create = {
+		template: `
+		<div class='create'>
+			<h3>保存数据，显示数据</h3>
+			<input type="text" id="user" placeholder="用户名" value="" v-model='userName' /><br />
+			<input type="text" id="age" placeholder="年龄" v-model='userAge' /><br />
+			<input type="radio" name="sex" value="男" checked v-model='userSex' />男
+			<input type="radio" name="sex" value="女"  v-model='userSex'/>女<br />
+			<input type="button" id="btn" value="添加数据" @click='saveData' />
+			<hr />
+		</div>
+		`,
+		data() {
+			return {
+				userName: '',
+				userAge: '',
+				userSex: '',
+			}
+		},
+		methods: {
+			saveData() {
+				this.$store.dispatch('setData', [this.userName, this.userAge, this.userSex]);
+				this.saveLocalData();
+			},
+			saveLocalData() {
+				let info = { "name": this.userName, "age": this.userAge, "sex": this.userSex }
 				
-	</script>
+				// localStorage.setItem('name', this.userName);
+				// localStorage.setItem('age', this.userAge);
+				// localStorage.setItem('sex', this.userSex);
+			}
+		},
+
+	}
+	let oTr = {
+		template: `
+		<tr>
+			<th></th>
+			<th>{{userName}}</th>
+			<th></th>
+			<th></th>
+			<th>操作</th>
+		</tr>
+		`,
+		computed: {
+			userName() {
+				return this.$store.state.userName
+			},
+			userAge() {
+				return this.$store.state.userAge
+			},
+			userSex() {
+				return this.$store.state.userSex
+			}
+		},
+		data() {
+			return {
+				arr1: []
+			}
+		},
+
+	}
+	let oTable = {
+		template: `
+		<table border="1">
+			<thead>
+			<tr>
+				<th>序号</th>
+				<th>姓名</th>
+				<th>年龄</th>
+				<th>性别</th>
+				<th>操作</th>
+			</tr>
+			<tr is='oTr'>
+			
+			</tr>
+			</thead>
+			<tbody></tbody>
+		</table>
+		`,
+		components: { oTr },
+		data() {
+			return {
+
+			}
+		},
+	}
+	let App = {
+		template: `
+		<div id='app'>
+			<div is='create'></div>
+			<table is='oTable'></table>
+		</div>
+		`,
+		components: { create, oTable }
+	}
+
+	let vm = new Vue({
+		el: '#app',
+		render: h => h(App),
+		components: { App },
+		store
+	})
+</script>
+
 </html>
